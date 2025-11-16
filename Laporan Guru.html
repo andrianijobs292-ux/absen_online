@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Kehadiran Guru</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-shadow:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-shadow {
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .transition-smooth {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .border-subtle {
+            border: 1px solid #e2e8f0;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .notification.hide {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+        animation: fadeIn 0.3s ease-in-out;
+        }
+
+        #jhtJtmChart {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+        }
+
+        .chart-container {
+        width: 100%;
+        height: 420px;
+        margin-left: -1rem;
+        margin-right: -1rem;
+        }
+
+         /* === RESPONSIVE (HP) === */
+        @media (max-width: 640px) {
+          .filter-container {
+            flex-direction: column; /* 🔹 Susun ke bawah di HP */
+            align-items: stretch;   /* 🔹 Full lebar */
+          }
+
+          .filter-container select {
+            width: 100%;            /* 🔹 Biar full lebar di HP */
+          }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .nav-item {
+            transition: all 0.2s ease;
+        }    
+        .nav-item:hover {
+            transform: translateX(4px);
+        }
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+</style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
+    <div class="flex min-h-screen">
+
+                <!-- Sidebar -->
+            <div id="sidebar"
+                class="sidebar-transition fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl transform -translate-x-full border-r border-gray-200 flex flex-col">
+
+                <!-- Sidebar Header -->
+            <div class="flex items-center justify-between h-20 px-6 bg-gradient-to-r from-blue-600 to-purple-600 flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white">MAS At-Tafsiri</h1>
+                    <p class="text-sm text-white/80">2025/2026</p>
+                </div>
+            </div>
+            <button id="closeSidebar" class="text-white hover:text-white/80 p-2 rounded-lg hover:bg-white/10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+    <!-- Navigation (scrollable part) -->
+    <nav class="flex-1 overflow-y-auto px-4 py-6">
+        <div class="space-y-2">
+            
+            <a href="Dash.html" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-blue-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                    <svg class="w-5 h-5 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium">Agenda Hari Ini</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Jadwal mengajar</p>
+                </div>
+            </a>
+
+            <a href="Jadwal.html" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-blue-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                    <svg class="w-5 h-5 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium group-hover:text-gray-900">Jadwal Mengajar</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Kelola jadwal</p>
+                </div>
+            </a>
+
+            <a href="Data Siswa.html" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-blue-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                    <svg class="w-5 h-5 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium group-hover:text-gray-900">Data Siswa</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Manajemen siswa</p>
+                </div>
+            </a>
+                    
+                    <a href="Agenda Guru.html" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                        <div class="w-10 h-10 bg-gray-100 group-hover:bg-blue-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                            <svg class="w-5 h-5 text-blue group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2-10H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2zM9 2h6a2 2 0 012 2v2H7V4a2 2 0 012-2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="font-medium">Data Agenda</span>
+                            <p class="text-xs text-gray-500 group-hover:text-gray-600">Manajemen Agenda Kegiatan</p>
+                        </div>
+                    </a>
+            <!-- item aktif -->
+            <div class="nav-item">
+                <button onclick="toggleSubMenu('laporanSubMenu')" class="w-full flex items-center px-4 py-3 text-white bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl shadow-lg">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-white-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex justify-between items-center w-full">
+                        <div>
+                            <span class="font-medium group-hover:text-gray-900">Laporan</span>
+                            <p class="text-xs text-white/80">Analisis data</p>
+                        </div>
+                        <!-- Panah dropdown -->
+                            <svg id="arrow-laporanSubMenu" class="w-4 h-4 text-white-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                </button>
+
+                <!-- 🔽 Submenu -->
+                <div id="laporanSubMenu" class="hidden pl-16 mt-2 space-y-2">
+                    <a href="Laporan Guru.html"
+                        class="w-full flex items-center px-4 py-1 text-white bg-gradient-to-r from-blue-500 to-green-700 rounded-xl shadow-lg">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-1.105-.895-2-2-2H6v10h4c1.105 0 2-.895 2-2v-6zM18 9h-4v10h4a2 2 0 002-2v-6a2 2 0 00-2-2z" />
+                            </svg>
+                                <span>Aktivitas Guru</span>
+                    </a>
+                    <a href="Laporan Siswa.html"
+         class="flex items-center gap-2 text-gray-600 hover:text-purple-700 transition-colors px-3 py-2">
+          <svg class="w-4 h-4 text-gray-500 group-hover:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m-6-6v6m12-6v6" />
+          </svg>
+          <span>Laporan Siswa</span>
+                </a>
+
+                </div>
+                </div>
+
+            <a href="#" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-orange-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                    <svg class="w-5 h-5 text-orange-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium group-hover:text-gray-900">Pengaturan</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Konfigurasi</p>
+                </div>
+            </a>
+        </div>
+
+                <!-- User Profile Section -->
+        <div class="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+            <a href="#" onclick="logout()" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group transition-all duration-300">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-red-600 rounded-lg flex items-center justify-center mr-3 transition-colors duration-300">
+                    <svg class="w-5 h-5 text-red-600 group-hover:text-white transition-colors duration-300"
+                         fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h6a1 1 0 110 2H5v10h5a1 1 0 110 2H4a1 1 0 01-1-1V4zm9.293 2.293a1 1 0 011.414 0L17 9.586a2 2 0 010 2.828l-3.293 3.293a1 1 0 01-1.414-1.414L14.586 12H9a1 1 0 110-2h5.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium group-hover:text-gray-900">Keluar</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Akhiri sesi</p>
+                </div>
+            </a>
+        </div>
+    </nav>
+</div>
+
+        <!-- Overlay untuk mobile -->
+        <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-lg">
+                <div class="flex items-center justify-between h-20 px-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="menuToggle" class="p-2 rounded-xl bg-gray-100 shadow-md hover:shadow-lg transition-shadow text-gray-600 hover:text-gray-800">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Agenda Guru</h2>
+                            <div id="clock" class="text-left">
+                            <span id="date" class="text-sm font-medium" style="color: rgb(14, 79, 151);"></span>
+                            <span id="time" class="text-sm font-medium ml-2" style="color: rgb(14, 79, 151);"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <!-- User Profile -->
+                        <div class="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-xl border border-blue-200">
+                            <div id="avatar"
+                            class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                ?
+                            </div>
+                            <div class="hidden md:block">
+                                <p class="text-sm font-semibold text-gray-800" id="nama"></p>
+                                <p class="text-xs text-gray-600">Guru <span id="mapel"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+    <main class="container mx-auto px-4 py-8">
+        <!-- Header Card -->
+        <div class="bg-blue-600 rounded-xl border-subtle p-6 mb-8 card-shadow header-shadow">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-white">Laporan Guru</h1>
+                        <p class="text-sm text-white mt-1">Monitoring Jam Hari Tatap Muka dan Jam Tatap Muka Guru</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-xl border-subtle p-6 card-shadow transition-smooth">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 px-3 py-1 rounded-full">
+                        <span class="text-xs font-semibold text-blue-700">JHT</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Jam Hari Tatap Muka</p>
+                    <p id="totalJHT" class="text-3xl font-bold text-gray-900">0</p>
+                    <p class="text-xs text-gray-400 mt-1 jht-desc">Total jam dalam setahun</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border-subtle p-6 card-shadow transition-smooth">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 px-3 py-1 rounded-full">
+                        <span class="text-xs font-semibold text-green-700">JTM</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Jam Tatap Muka</p>
+                    <p id="totalJTM" class="text-3xl font-bold text-gray-900">0</p>
+                    <p class="text-xs text-gray-400 mt-1 jtm-desc">Total jam mengajar aktual</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="bg-white rounded-xl border-subtle p-8 card-shadow mb-8">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Grafik JHT dan JTM Bulanan</h3>
+                        <p class="text-sm text-gray-500 font-medium">Perbandingan Jam Hari Tatap Muka dan Jam Tatap Muka per bulan</p>
+                    </div>
+                </div>
+                
+<!-- 🔹 Filter Area -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-3 sm:space-y-0">
+          <!-- 🔹 Filter Mapel -->
+          <select id="mapelFilter" 
+              class="px-4 py-2 text-sm border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm font-medium w-full sm:w-auto">
+              <option value="all">Semua Mapel</option>
+          </select>
+
+          <!-- 🔹 Filter Semester -->
+          <select id="semesterFilter" 
+              class="px-4 py-2 text-sm border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm font-medium w-full sm:w-auto">
+              <option value="all">Semua Semester</option>
+              <option value="semester1">Semester 1</option>
+              <option value="semester2">Semester 2</option>
+          </select>
+        </div>
+    
+            </div>
+            <div class="h-80 w-full">
+                <canvas id="jhtJtmChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Detailed Table -->
+        <div class="bg-white rounded-xl border-subtle card-shadow overflow-hidden">
+            <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0V4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V10z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Detail JHT dan JTM Bulanan</h3>
+                        <p class="text-sm text-gray-600 font-medium">Laporan komprehensif Jam Hari Tatap Muka dan Jam Tatap Muka per bulan</p>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">JHT (Jam)</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">JTM (Jam)</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jhtJtmTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Data akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Pop-up -->
+<div id="notification" class="notification bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg border border-blue-300 p-4 min-w-80">
+    <div class="flex items-center">
+        <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="ml-3 flex-1">
+            <p class="text-sm font-medium text-white" id="notificationTitle">Filter Diubah</p>
+            <p class="text-xs text-blue-100 mt-1" id="notificationMessage">Grafik telah diperbarui sesuai filter yang dipilih</p>
+        </div>
+        <div class="ml-4 flex-shrink-0">
+            <button onclick="hideNotification()" class="text-white text-opacity-80 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div> <!-- ⬅️ tutup notifikasi dulu di sini -->
+
+<!-- Modal Lihat Data -->
+<div id="dataModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white/80 rounded-2xl shadow-2xl w-11/12 max-w-5xl p-8 relative animate-fadeIn">
+    
+    <!-- Tombol Tutup -->
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <!-- Judul Modal -->
+    <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">
+      Detail Data Bulan <span id="modalMonth" class="text-indigo-700"></span>
+    </h2>
+
+    <!-- Dua Kolom (JHT dan JTM) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <!-- Kolom JHT -->
+            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200 shadow-md hover:shadow-lg transition-all">
+            <h3 class="text-lg font-semibold text-blue-700 mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                Jam Hari Tatap Muka (JHT)
+            </h3>
+            <div class="overflow-hidden rounded-lg border border-blue-200">
+                <table class="w-full text-sm">
+                <thead class="bg-blue-600 text-white uppercase text-center tracking-wide">
+                    <tr>
+                    <th class="py-2 px-3">Hari / Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody id="jhtTableBody" class="text-gray-700 divide-y divide-blue-100 text-center"></tbody>
+                </table>
+            </div>
+            </div>
+
+            <!-- Kolom JTM -->
+            <div class="bg-green-50 rounded-xl p-5 border border-green-200 shadow-md hover:shadow-lg transition-all">
+            <h3 class="text-lg font-semibold text-green-700 mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/>
+                </svg>
+                Jam Tatap Muka (JTM)
+            </h3>
+            <div class="overflow-hidden rounded-lg border border-green-200">
+                <table class="w-full text-sm">
+                <thead class="bg-green-600 text-white uppercase text-center tracking-wide">
+                    <tr>
+                    <th class="py-2 px-3 border-r border-green-500">Kelas</th>
+                    <th class="py-2 px-3">Jumlah Pertemuan</th>
+                    </tr>
+                </thead>
+                <tbody id="jtmTableBody" class="text-gray-700 divide-y divide-green-100 text-center"></tbody>
+                </table>
+            </div>
+            </div>
+    </div>
+  </div>
+</div>
+
+<script src="auth-info.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const BASE_URL = localStorage.getItem("sheet_url_base");
+if (!BASE_URL) {
+  alert("Silakan login terlebih dahulu!");
+  window.location.href = "login.html";
+}
+
+// Laporan Guru
+const sheetUrl = BASE_URL + "?type=laporan_guru";
+
+let chartInstance;
+let allData = [];
+
+// 🔹 Load info guru (avatar, nama, mapel)
+loadGuruInfoGlobal();
+
+// 🔹 Fungsi mengambil data JSON
+async function loadData() {
+  try {
+    const res = await fetch(sheetUrl);
+    const data = await res.json();
+    allData = data;
+    console.log("Data diterima:", data);
+
+    populateMapelFilter(data);
+    renderChart(data);
+  } catch (err) {
+    console.error("Gagal memuat data:", err);
+  }
+}
+
+// 🔹 Isi dropdown mapel dari data JSON
+function populateMapelFilter(data) {
+  const mapelSet = new Set();
+  data.forEach(bulanObj => {
+    bulanObj.mapelList.forEach(m => mapelSet.add(m.mapel));
+  });
+  const select = document.getElementById("mapelFilter");
+  select.innerHTML = `<option value="all">Semua Mapel</option>`;
+  Array.from(mapelSet).sort().forEach(mapel => {
+    select.innerHTML += `<option value="${mapel}">${mapel}</option>`;
+  });
+}
+
+// 🔹 Render grafik
+let jhtJtmChart = null;
+
+function renderChart(data, selectedMapel = "all", semester = "all") {
+  const allMonths = [
+    { num: 1,  name: "Januari", short: "Jan" },
+    { num: 2,  name: "Februari", short: "Feb" },
+    { num: 3,  name: "Maret", short: "Mar" },
+    { num: 4,  name: "April", short: "Apr" },
+    { num: 5,  name: "Mei", short: "Mei" },
+    { num: 6,  name: "Juni", short: "Jun" },
+    { num: 7,  name: "Juli", short: "Jul" },
+    { num: 8,  name: "Agustus", short: "Agu" },
+    { num: 9,  name: "September", short: "Sep" },
+    { num: 10, name: "Oktober", short: "Okt" },
+    { num: 11, name: "November", short: "Nov" },
+    { num: 12, name: "Desember", short: "Des" }
+  ];
+
+  // 🔹 Filter bulan per semester
+  let monthsToShow = allMonths;
+  if (semester === "semester1") {
+    monthsToShow = allMonths.slice(6, 12); // Juli–Desember
+  } else if (semester === "semester2") {
+    monthsToShow = allMonths.slice(0, 6); // Januari–Juni
+  }
+
+  const years = [...new Set(data.map(d => d.tahun))].sort();
+  const months = [];
+  years.forEach(year => {
+    monthsToShow.forEach(m => months.push(`${m.short} ${year}`));
+  });
+
+  // 🔹 Hitung JHT berdasarkan tanggal unik
+  const jhtData = months.map(label => {
+    const [bulanShort, tahun] = label.split(" ");
+    const bulanObj = allMonths.find(m => m.short === bulanShort);
+    const bulanData = data.find(
+      d => d.bulanNum === bulanObj.num && d.tahun === parseInt(tahun)
+    );
+
+    if (!bulanData) return 0;
+
+    const tanggalSet = new Set();
+    bulanData.mapelList
+      .filter(m => selectedMapel === "all" || m.mapel === selectedMapel)
+      .forEach(m => {
+        if (m.detail) {
+          m.detail.forEach(det => tanggalSet.add(det.tanggal));
+        }
+      });
+
+    return tanggalSet.size; // total tanggal unik = total hari tatap muka
+  });
+
+  // 🔹 Hitung JTM seperti biasa
+  const jtmData = months.map(label => {
+    const [bulanShort, tahun] = label.split(" ");
+    const bulanObj = allMonths.find(m => m.short === bulanShort);
+    const bulanData = data.find(
+      d => d.bulanNum === bulanObj.num && d.tahun === parseInt(tahun)
+    );
+
+    if (!bulanData) return 0;
+
+    return bulanData.mapelList
+      .filter(m => selectedMapel === "all" || m.mapel === selectedMapel)
+      .reduce((sum, m) => sum + (m.jtm || 0), 0);
+  });
+
+  // 🔹 Hapus chart lama
+  if (jhtJtmChart) jhtJtmChart.destroy();
+
+  // 🔹 Opsi chart
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: "index" },
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          usePointStyle: true,
+          padding: 25,
+          font: { size: 13, weight: "600" },
+          color: "#374151"
+        }
+      },
+      tooltip: {
+        backgroundColor: "rgba(17, 24, 39, 0.95)",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+        borderColor: "#6b7280",
+        borderWidth: 1,
+        cornerRadius: 12,
+        displayColors: true,
+        padding: 12,
+        titleFont: { size: 14, weight: "bold" },
+        bodyFont: { size: 13 },
+        callbacks: {
+          label: function (context) {
+            const label = context.dataset.label;
+            const value = context.parsed.y;
+            if (label.includes("JHT")) return label + ": " + value + " Hari";
+            if (label.includes("JTM")) return label + ": " + value + " JP";
+            return label + ": " + value;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: "#f3f4f6", drawBorder: false },
+        ticks: {
+          precision: 0,
+          stepSize: 1,
+          color: "#6b7280",
+          font: { size: 12, weight: "500" },
+          padding: 10,
+          callback: value => value + " Hari/JP"
+        },
+        border: { display: false }
+      },
+      x: {
+        grid: { display: false, drawBorder: false },
+        ticks: {
+          color: "#6b7280",
+          font: { size: 12, weight: "600" },
+          padding: 10
+        },
+        border: { display: false }
+      }
+    },
+    elements: { bar: { borderRadius: 8, borderSkipped: false } }
+  };
+
+  // 🔹 Render chart baru
+  const ctx = document.getElementById("jhtJtmChart").getContext("2d");
+  jhtJtmChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: months,
+      datasets: [
+        {
+          label: "JHT (Jam Hari Tatap Muka)",
+          data: jhtData,
+          backgroundColor: "rgba(59, 130, 246, 0.8)",
+          borderColor: "#3b82f6",
+          hoverBackgroundColor: "rgba(59, 130, 246, 0.9)",
+          hoverBorderColor: "#2563eb"
+        },
+        {
+          label: "JTM (Jam Tatap Muka)",
+          data: jtmData,
+          backgroundColor: "rgba(16, 185, 129, 0.8)",
+          borderColor: "#10b981",
+          hoverBackgroundColor: "rgba(16, 185, 129, 0.9)",
+          hoverBorderColor: "#059669"
+        }
+      ]
+    },
+    options: chartOptions
+  });
+
+  // 🔹 Update ringkasan & tabel
+  updateSummary(jhtData, jtmData, semester, selectedMapel);
+  updateTable(allData, semester, selectedMapel);
+}
+
+function updateSummary(jhtData, jtmData, semester, selectedMapel) {
+  // 🔹 Hitung total JHT = jumlah tanggal unik dari seluruh bulan (sudah dihitung unik per bulan)
+  const totalJHT = jhtData.reduce((sum, val) => sum + val, 0);
+
+  // 🔹 Hitung total JTM = total jam tatap muka dari seluruh bulan
+  const totalJTM = jtmData.reduce((sum, val) => sum + val, 0);
+
+  // 🔹 Tentukan teks semester
+  let semesterText = "dalam setahun";
+  if (semester === "semester1") semesterText = "dalam Semester 1";
+  else if (semester === "semester2") semesterText = "dalam Semester 2";
+
+  // 🔹 Update nilai total ke tampilan
+  const totalJHTElement = document.getElementById("totalJHT");
+  const totalJTMElement = document.getElementById("totalJTM");
+
+  if (totalJHTElement) totalJHTElement.textContent = totalJHT.toLocaleString("id-ID");
+  if (totalJTMElement) totalJTMElement.textContent = totalJTM.toLocaleString("id-ID");
+
+  // 🔹 Update teks deskripsi bawah
+  const jhtDesc = document.querySelector(".jht-desc");
+  const jtmDesc = document.querySelector(".jtm-desc");
+
+  if (jhtDesc) jhtDesc.textContent = `Total hari ${semesterText}`;
+  if (jtmDesc) jtmDesc.textContent = `Total pertemuan ${semesterText}`;
+}
+
+// 🔹 Event Listener
+document.getElementById("mapelFilter").addEventListener("change", e => {
+  const mapel = e.target.value;
+  const semester = document.getElementById("semesterFilter").value;
+  renderChart(allData, mapel, semester);
+});
+
+document.getElementById("semesterFilter").addEventListener("change", e => {
+  const semester = e.target.value;
+  const mapel = document.getElementById("mapelFilter").value;
+  renderChart(allData, mapel, semester);
+});
+
+function updateTable(data, semester, selectedMapel) {
+  const tbody = document.getElementById("jhtJtmTable");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  // Daftar bulan per semester
+  const isSemester1Month = ["Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  const isSemester2Month = ["Januari", "Februari", "Maret", "April", "Mei", "Juni"];
+
+  // Filter data berdasarkan semester
+  const filteredData = data.filter(item => {
+    const bulan = item.bulan;
+    const sem1 = isSemester1Month.includes(bulan);
+    const sem2 = isSemester2Month.includes(bulan);
+    return (
+      semester === "all" ||
+      (semester === "semester1" && sem1) ||
+      (semester === "semester2" && sem2)
+    );
+  });
+
+  // Isi tabel per bulan
+  filteredData.forEach(item => {
+    // Filter mapel kalau dipilih
+    const mapelList = selectedMapel && selectedMapel !== "all"
+      ? item.mapelList.filter(m => m.mapel === selectedMapel)
+      : item.mapelList;
+
+    // Hitung JHT berdasarkan tanggal unik
+    const tanggalSet = new Set();
+    mapelList.forEach(m => {
+      if (m.detail) {
+        m.detail.forEach(det => {
+          tanggalSet.add(det.tanggal); // masukkan semua tanggal ke dalam Set
+        });
+      }
+    });
+    const totalJHT = tanggalSet.size;
+
+    // Hitung total JTM seperti biasa
+    const totalJTM = mapelList.reduce((sum, m) => sum + (m.jtm || 0), 0);
+
+    const monthLabel = `${item.bulan} ${item.tahun}`;
+
+    const row = document.createElement("tr");
+    row.className = "hover:bg-gray-50";
+    row.innerHTML = `
+      <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${monthLabel}</td>
+      <td class="px-6 py-4 whitespace-nowrap text-center">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${totalJHT}</span>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-center">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">${totalJTM}</span>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-center">
+        <button onclick="viewData('${monthLabel}')" 
+          class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-smooth">
+          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+          Lihat Data
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  // Kalau tidak ada data
+  if (filteredData.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500 italic">
+          Tidak ada data untuk filter ini
+        </td>
+      </tr>
+    `;
+  }
+}
+
+// Tombol "Lihat Data"
+async function viewData(month) {
+  document.getElementById("modalMonth").textContent = month;
+  document.getElementById("dataModal").classList.remove("hidden");
+
+  const jhtBody = document.getElementById("jhtTableBody");
+  const jtmBody = document.getElementById("jtmTableBody");
+  const selectedMapel = document.getElementById("mapelFilter").value;
+
+  // Elemen tempat menampilkan nama mapel di bawah judul
+  let mapelInfo = document.getElementById("mapelInfo");
+  if (!mapelInfo) {
+    const modalTitle = document.querySelector("#dataModal h2");
+    mapelInfo = document.createElement("p");
+    mapelInfo.id = "mapelInfo";
+    mapelInfo.className = "text-sm text-gray-600 mt-1 italic";
+    modalTitle.insertAdjacentElement("afterend", mapelInfo);
+  }
+  mapelInfo.textContent = "Memuat mata pelajaran...";
+
+  // Loading sementara
+  jhtBody.innerHTML = `<tr><td class="text-center py-3 text-gray-500">Memuat data...</td></tr>`;
+  jtmBody.innerHTML = `<tr><td colspan="2" class="text-center py-3 text-gray-500">Memuat data...</td></tr>`;
+
+  try {
+    const response = await fetch(sheetUrl);
+    const result = await response.json();
+
+    // Ambil bulan & tahun dari teks "Oktober 2025"
+    const [bulanName, tahun] = month.split(" ");
+    const bulanData = result.find(d => d.bulan === bulanName && d.tahun === parseInt(tahun));
+
+    if (!bulanData) {
+      jhtBody.innerHTML = `<tr><td class="text-center text-gray-500 py-3">Tidak ada data</td></tr>`;
+      jtmBody.innerHTML = `<tr><td colspan="2" class="text-center text-gray-500 py-3">Tidak ada data</td></tr>`;
+      mapelInfo.textContent = "Mata Pelajaran: -";
+      return;
+    }
+
+    // 🔹 Filter mapel jika dipilih
+    const mapelList = selectedMapel !== "all"
+      ? bulanData.mapelList.filter(m => m.mapel === selectedMapel)
+      : bulanData.mapelList;
+
+    // Tampilkan nama mapel di bawah judul
+    const mapelTitle =
+      selectedMapel !== "all"
+        ? selectedMapel
+        : mapelList.length === 1
+        ? mapelList[0].mapel
+        : "Semua Mapel";
+    mapelInfo.textContent = `Mata Pelajaran: ${mapelTitle}`;
+
+    // =============== 🔹 BAGIAN JHT (Tanggal unik) ===============
+    const tanggalSet = new Set();
+    mapelList.forEach(m => {
+      m.detail.forEach(det => tanggalSet.add(det.tanggal));
+    });
+
+    if (tanggalSet.size > 0) {
+      const rows = Array.from(tanggalSet).map(tgl => {
+        const d = new Date(tgl);
+        const namaHari = d.toLocaleDateString("id-ID", { weekday: "long" });
+        const tanggalLengkap = d.toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric"
+        });
+        return `<tr><td class="border px-3 py-2">${namaHari}, ${tanggalLengkap}</td></tr>`;
+      }).join("");
+      jhtBody.innerHTML = rows;
+    } else {
+      jhtBody.innerHTML = `<tr><td class="text-center text-gray-500 py-3">Tidak ada data</td></tr>`;
+    }
+
+    // =============== 🔹 BAGIAN JTM (Gabung kelas yang sama) ===============
+    const jtmMap = new Map();
+
+    mapelList.forEach(m => {
+      m.detail.forEach(det => {
+        det.kelas.forEach(kls => {
+          jtmMap.set(kls, (jtmMap.get(kls) || 0) + 1);
+        });
+      });
+    });
+
+    if (jtmMap.size > 0) {
+      // 🔹 Urutkan kelas secara berjenjang dan abjad
+      const urutanKelas = ["X", "XI", "XII"];
+      const sortedJtm = Array.from(jtmMap.entries()).sort(([a], [b]) => {
+        const [tingkatA, rombelA] = a.split("-");
+        const [tingkatB, rombelB] = b.split("-");
+        const idxA = urutanKelas.indexOf(tingkatA);
+        const idxB = urutanKelas.indexOf(tingkatB);
+        if (idxA !== idxB) return idxA - idxB;
+        if (rombelA && rombelB) return rombelA.localeCompare(rombelB);
+        return a.localeCompare(b);
+      });
+
+      const rows = sortedJtm.map(([kelas, jumlah]) => `
+        <tr>
+          <td class="border px-3 py-2">${kelas}</td>
+          <td class="border px-3 py-2 text-center">${jumlah}</td>
+        </tr>
+      `).join("");
+      jtmBody.innerHTML = rows;
+    } else {
+      jtmBody.innerHTML = `<tr><td colspan="2" class="text-center text-gray-500 py-3">Tidak ada data</td></tr>`;
+    }
+
+  } catch (err) {
+    console.error("Gagal ambil data:", err);
+    jhtBody.innerHTML = `<tr><td class="text-center text-red-500 py-3">Gagal memuat data</td></tr>`;
+    jtmBody.innerHTML = `<tr><td colspan="2" class="text-center text-red-500 py-3">Gagal memuat data</td></tr>`;
+    mapelInfo.textContent = "Mata Pelajaran: (gagal dimuat)";
+  }
+}
+
+window.viewData = viewData;
+
+function closeModal() {
+  document.getElementById("dataModal").classList.add("hidden");
+}
+
+// Jalankan saat halaman siap
+loadData();
+</script>
+
+<script>
+  function toggleSubMenu(id) {
+      const submenu = document.getElementById(id);
+      const arrow = document.getElementById('arrow-' + id);
+
+      submenu.classList.toggle('hidden');
+      arrow.classList.toggle('rotate-180'); // animasi panah berputar
+  }
+</script>
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const overlay = document.getElementById('overlay');
+
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebarFunc() {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+     // tombol hamburger
+    menuToggle.addEventListener('click', openSidebar);
+    // tombol X di sidebar
+    closeSidebar.addEventListener('click', closeSidebarFunc);
+    // klik overlay
+    overlay.addEventListener('click', closeSidebarFunc);
+
+    // klik di luar sidebar
+    document.addEventListener('click', function(e) {
+        const clickInside = sidebar.contains(e.target);
+        const clickToggle = menuToggle.contains(e.target);
+        const isMobile = window.innerWidth < 1024;
+        if (!clickInside && !clickToggle && isMobile && !sidebar.classList.contains('-translate-x-full')) {
+            closeSidebarFunc();
+        }
+    });
+
+    // Saat resize, tampilkan sidebar normal di desktop
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 1024) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        } else {
+            sidebar.classList.add('-translate-x-full');
+        }
+    });
+</script>
+<script>
+    function updateClock() {
+        const now = new Date();
+
+        // Format waktu: HH:MM:SS
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        // Format tanggal: Rabu, 23 Oktober 2025
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateString = now.toLocaleDateString('id-ID', options);
+
+        document.getElementById('date').textContent = dateString + ',';
+        document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+
+        // Update di bagian "Jadwal Hari Ini" (tanpa jam)
+        const tanggalJadwal = document.getElementById('tanggalJadwal');
+        if (tanggalJadwal) {
+            tanggalJadwal.textContent = dateString;
+        }
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+    </script>
+<script>
+function logout() {
+  if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
+    localStorage.removeItem("guru_username");
+    localStorage.removeItem("sheet_url_base");
+    window.location.href = "login User.html";
+  }
+}
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9949717ae7d8be7b',t:'MTc2MTQ3NjM1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

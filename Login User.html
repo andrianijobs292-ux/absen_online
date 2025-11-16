@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login User</title>
+  <style>
+    /* ===== RESET DASAR ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #007bff, #6610f2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* ===== CARD LOGIN ===== */
+    .login-box {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 40px 35px;
+      width: 100%;
+      max-width: 380px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      font-size: 14px;
+      color: #555;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      font-size: 15px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .input-group input:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+
+    .login-box button {
+      width: 100%;
+      background: linear-gradient(90deg, #007bff, #6610f2);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .login-box button:hover {
+      background: linear-gradient(90deg, #0056b3, #520dc2);
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .login-footer a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 420px) {
+      .login-box {
+        padding: 30px 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <h2>Login User</h2>
+
+    <form onsubmit="loginUser(event)">
+      <div class="input-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Masukkan username (misal: andriani)" required />
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Masukkan password" required />
+      </div>
+
+      <button type="submit">Masuk</button>
+
+      <div class="login-footer">
+        Belum punya akun? <a href="register.html">Daftar di sini</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Script login diletakkan di bawah -->
+  <script>
+function loginUser(e) {
+  e.preventDefault();
+
+  const username = document.getElementById("username").value.trim().toLowerCase();
+  const password = document.getElementById("password").value.trim();
+
+  // 🔹 Daftar akun guru dan sheet URL masing-masing
+  const akunGuru = {
+    "andriani": {
+      password: "1234",
+      sheetUrl: "https://script.google.com/macros/s/AKfycbwfOJDwFfGpTEgb8yFuWVFda63cZPmCDcTZDuOCjHnmT-CqMZ1Oqs1dY7TIFuunYqjQ/exec"
+    },
+    "adi": {
+      password: "1234",
+      sheetUrl: "https://script.google.com/macros/s/AKfycbzPOMyxnRSHrtrW1yKqzDDVv-I5fhGotbCKIgckK_xOzMuK0hJwqKSOdxG9wIM5o-ytKQ/exec"
+    },
+    "sahli": {
+      password: "1234",
+      sheetUrl: "https://script.google.com/macros/s/AKfycbwQd2p54UXbAtsdPwc1oT1CUoYmKwzs_lpeQ_6anV3Gp3B1hcingoBFnyTQkXA3dDxT2A/exec"
+    }
+  };
+
+  if (!akunGuru[username]) {
+    alert("❌ Username tidak ditemukan");
+    return;
+  }
+
+  if (akunGuru[username].password !== password) {
+    alert("⚠️ Password salah");
+    return;
+  }
+
+  // 🔹 Simpan data login agar bisa diakses halaman lain
+  localStorage.setItem("guru_username", username);
+
+  // ⬅️ WAJIB: ini dipakai jadwal, dashboard dll
+  localStorage.setItem("sheet_url_base", akunGuru[username].sheetUrl);
+
+  alert("✅ Login berhasil!");
+  window.location.href = "index.html"; // halaman utama setelah login
+}
+</script>
+
+</body>
+</html>

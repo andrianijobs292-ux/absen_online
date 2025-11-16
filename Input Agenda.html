@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Isian Agenda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            box-sizing: border-box;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-save {
+            animation: pulseSave 2s ease-in-out;
+        }
+        
+        @keyframes pulseSave {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .success-notification {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* warna untuk field yang tidak bisa diubah */
+        .readonly-field {
+        background-color: #9b87f3; /* abu muda */
+        color: #fff;               /* teks sedikit gelap */
+        font-weight: bold;
+        }
+
+        /* jika Mapel hanya satu, input readonly di dalam container diberi warna */
+        #mapelContainer input[readonly] {
+        background-color: #9b87f3;
+        color: #fff;
+        font-weight: bold;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .nav-item {
+            transition: all 0.2s ease;
+        }    
+        .nav-item:hover {
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+    <body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 font-sans">
+        <div class="flex min-h-screen">
+
+                <!-- Sidebar -->
+            <div id="sidebar"
+                class="sidebar-transition fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl transform -translate-x-full border-r border-gray-200 flex flex-col">
+
+                <!-- Sidebar Header -->
+            <div class="flex items-center justify-between h-20 px-6 bg-gradient-to-r from-blue-600 to-purple-600 flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white">MAS At-Tafsiri</h1>
+                    <p class="text-sm text-white/80">2025/2026</p>
+                </div>
+            </div>
+            <button id="closeSidebar" class="text-white hover:text-white/80 p-2 rounded-lg hover:bg-white/10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+    <!-- Navigation (scrollable part) -->
+    <nav class="flex-1 overflow-y-auto px-4 py-6">
+        <div class="space-y-2">
+            
+            <a href="index.html" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-blue-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                    <svg class="w-5 h-5 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium">Agenda Hari Ini</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Jadwal mengajar</p>
+                </div>
+            </a>
+
+            <a href="Jadwal.html" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-blue-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                    <svg class="w-5 h-5 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium group-hover:text-gray-900">Jadwal Mengajar</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Kelola jadwal</p>
+                </div>
+            </a>
+
+            <a href="Data Siswa.html" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-green-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                    <svg class="w-5 h-5 text-green-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium group-hover:text-gray-900">Data Siswa</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Manajemen siswa</p>
+                </div>
+            </a>
+                    <!-- item aktif -->
+                    <a href="Agenda Guru.html" class="nav-item flex items-center px-4 py-3 text-white bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl shadow-lg">
+                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-white group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2-10H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2zM9 2h6a2 2 0 012 2v2H7V4a2 2 0 012-2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="font-medium">Data Agenda</span>
+                            <p class="text-xs text-white/80">Manajemen Agenda Kegiatan</p>
+                        </div>
+                    </a>
+
+            <div class="nav-item">
+                <button onclick="toggleSubMenu('laporanSubMenu')" class="w-full flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group focus:outline-none transition-all">
+                    <div class="w-10 h-10 bg-gray-100 group-hover:bg-purple-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                        <svg class="w-5 h-5 text-purple-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex justify-between items-center w-full">
+                        <div>
+                            <span class="font-medium group-hover:text-gray-900">Laporan</span>
+                            <p class="text-xs text-gray-500 group-hover:text-gray-600">Analisis data</p>
+                        </div>
+                        <!-- Panah dropdown -->
+                            <svg id="arrow-laporanSubMenu" class="w-4 h-4 text-gray-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                </button>
+
+                <!-- 🔽 Submenu -->
+                <div id="laporanSubMenu" class="hidden pl-16 mt-2 space-y-2">
+                    <a href="Laporan Guru.html"
+                        class="block text-gray-600 hover:text-purple-700 transition-colors">
+                        • Aktitas Guru
+                    </a>
+                    <a href="Laporan Siswa.html"
+                        class="block text-gray-600 hover:text-purple-700 transition-colors">
+                        • Laporan Siswa
+                    </a>
+                </div>
+                </div>
+
+            <a href="#" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-orange-600 rounded-lg flex items-center justify-center mr-3 transition-colors">
+                    <svg class="w-5 h-5 text-orange-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium group-hover:text-gray-900">Pengaturan</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Konfigurasi</p>
+                </div>
+            </a>
+        </div>
+
+                <!-- User Profile Section -->
+        <div class="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+            <a href="#" onclick="logout()" class="nav-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-xl group transition-all duration-300">
+                <div class="w-10 h-10 bg-gray-100 group-hover:bg-red-600 rounded-lg flex items-center justify-center mr-3 transition-colors duration-300">
+                    <svg class="w-5 h-5 text-red-600 group-hover:text-white transition-colors duration-300"
+                         fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h6a1 1 0 110 2H5v10h5a1 1 0 110 2H4a1 1 0 01-1-1V4zm9.293 2.293a1 1 0 011.414 0L17 9.586a2 2 0 010 2.828l-3.293 3.293a1 1 0 01-1.414-1.414L14.586 12H9a1 1 0 110-2h5.586l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-medium group-hover:text-gray-900">Keluar</span>
+                    <p class="text-xs text-gray-500 group-hover:text-gray-600">Akhiri sesi</p>
+                </div>
+            </a>
+        </div>
+    </nav>
+</div>
+
+        <!-- Overlay untuk mobile -->
+        <div id="overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden hidden transition-opacity"></div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white/90 backdrop-blur-lg border-b border-gray-200 shadow-lg">
+                <div class="flex items-center justify-between h-20 px-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="menuToggle" class="p-2 rounded-xl bg-gray-100 shadow-md hover:shadow-lg transition-shadow text-gray-600 hover:text-gray-800">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Agenda Guru</h2>
+                            <div id="clock" class="text-left">
+                            <span id="date" class="text-sm font-medium" style="color: rgb(14, 79, 151);"></span>
+                            <span id="time" class="text-sm font-medium ml-2" style="color: rgb(14, 79, 151);"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <!-- User Profile -->
+                        <div class="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-xl border border-blue-200">
+                            <div id="avatar" 
+                            class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md">
+                                ?
+                            </div>
+                            <div class="hidden md:block">
+                                <p class="text-sm font-semibold text-gray-800" id="nama"></p>
+                                <p class="text-xs text-gray-600">Guru <span id="mapel"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                    </svg>
+                    <h1 class="text-3xl font-bold text-gray-800">Isian Agenda</h1>
+                </div>
+                <p class="text-gray-600">Lengkapi form agenda pembelajaran dengan detail yang akurat</p>
+            </div>
+
+            <!-- Form -->
+            <form id="formAbsen" class="space-y-6">
+                <!-- Informasi Dasar -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Informasi Dasar
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="guru" class="block text-sm font-medium text-gray-700 mb-2">Nama Guru</label>
+                            <input type="text" id="guru" name="guru" readonly 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors readonly-field">
+                            </select>
+                                </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sekolah</label>
+                            <div id="sekolahContainer">
+                            <!-- JS akan membuat input readonly atau dropdown di sini -->
+                            </div>
+                        </div>
+
+                        
+                        <div>
+                            <label for="kelas" class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                            <select id="kelas" name="kelas" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                                <option value="">Pilih Kelas</option>
+                                
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mata Pelajaran</label>
+                                <div id="mapelContainer">
+                        <!-- JS akan menambahkan input readonly atau dropdown di sini -->
+                                </div>
+                        </div>
+                        
+                        <div>
+                            <label for="hariTanggal" class="block text-sm font-medium text-gray-700 mb-2">Hari/Tanggal</label>
+                            <input type="date" id="hariTanggal" name="hariTanggal" required 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                        </div>
+                        
+                        <div>
+                            <label for="pertemuanKe" class="block text-sm font-medium text-gray-700 mb-2">Pertemuan Ke</label>
+                            <input type="number" id="pertemuanKe" name="pertemuanKe" min="1" required 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                        </div>
+                        
+                        <div>
+                            <label for="jam" class="block text-sm font-medium text-gray-700 mb-2">Jam Ke</label>
+                            <select id="jam" name="jam" required 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                                <option value="">Pilih Jam</option>
+                                
+                            </select>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label for="materi" class="block text-sm font-medium text-gray-700 mb-2">Materi</label>
+                            <textarea id="materi" name="materi" rows="3" required 
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                      placeholder="Tuliskan materi yang akan diajarkan..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Absen Siswa -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        Absen Siswa
+                    </h2>
+                    
+                    <div id="absenContainer" class="hidden fade-in">
+                        <div class="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-gray-200">
+                                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 w-16 border-r border-gray-200">No</th>
+                                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 border-r border-gray-200">Nama Siswa</th>
+                                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700 w-32 border-r border-gray-200">Status</th>
+                                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="siswaTableBody" class="divide-y divide-gray-100">
+                                    <!-- Data siswa akan dimuat di sini -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="pilihKelasMessage" class="text-center py-8 text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                        <p>Pilih kelas terlebih dahulu untuk menampilkan daftar siswa</p>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="submit" id="submitBtn" 
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                        <span id="submitText">Simpan Data Agenda</span>
+                        <svg id="loadingIcon" class="hidden w-5 h-5 ml-2 loading-spinner inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success Notification -->
+        <div id="successNotification" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl shadow-2xl p-8 mx-4 max-w-md w-full success-notification">
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Berhasil Disimpan!</h3>
+                    <p class="text-gray-600 mb-6">Data agenda pembelajaran telah berhasil disimpan ke sistem.</p>
+                    <button onclick="closeNotification()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script src="auth-info.js"></script>
+<script>
+    const BASE_URL = localStorage.getItem("sheet_url_base");
+    if (!BASE_URL) {
+    alert("Silakan login ulang!");
+    window.location.href = "login.html";
+    }
+
+    loadGuruInfoGlobal(); // untuk menampilkan identitas guru
+
+    fetch(BASE_URL + "?type=input")
+    .then(r => r.json())
+    .then(data => {
+    // ===== Guru =====
+    const guruInput = document.getElementById("guru");
+    guruInput.value = data.guru;
+    guruInput.readOnly = true;
+    guruInput.classList.add('readonly-field');
+
+    // ===== Mapel =====
+    const mapelContainer = document.getElementById("mapelContainer");
+    mapelContainer.innerHTML = '';
+    if(data.mapelList.length === 1) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = data.mapelList[0];
+      input.readOnly = true;
+      input.className = "w-full px-4 py-3 border border-gray-300 rounded-lg readonly-field";
+      mapelContainer.appendChild(input);
+    } else {
+      const select = document.createElement("select");
+      select.className = "w-full px-4 py-3 border border-gray-300 rounded-lg";
+      select.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
+      data.mapelList.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        select.appendChild(opt);
+      });
+      mapelContainer.appendChild(select);
+    }
+
+    // ===== Jam Ke =====
+    const jamSelect = document.getElementById("jam");
+    jamSelect.innerHTML = '<option value="">Pilih Jam Ke</option>';
+    data.jamList.forEach(j => {
+      const opt = document.createElement("option");
+      opt.value = j;
+      opt.textContent = j;
+      jamSelect.appendChild(opt);
+    });
+
+    // ===== Sekolah =====
+    const sekolahContainer = document.getElementById("sekolahContainer");
+    sekolahContainer.innerHTML = '';
+    const sekolahList = [data.sekolahA, data.sekolahB].filter(s => s);
+    const kelasSelect = document.getElementById("kelas");
+
+    if(sekolahList.length === 1){
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = sekolahList[0];
+      input.readOnly = true;
+      input.className = "w-full px-4 py-3 border border-gray-300 rounded-lg readonly-field";
+      sekolahContainer.appendChild(input);
+
+      // isi kelas otomatis
+      kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+      const kelasList = sekolahList[0] === data.sekolahA ? data.kelasA : data.kelasB;
+      kelasList.forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = k;
+        kelasSelect.appendChild(opt);
+      });
+
+    } else {
+      const select = document.createElement("select");
+      select.className = "w-full px-4 py-3 border border-gray-300 rounded-lg";
+      select.innerHTML = '<option value="">Pilih Sekolah</option>';
+      sekolahList.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        select.appendChild(opt);
+      });
+      sekolahContainer.appendChild(select);
+
+      select.addEventListener("change", function() {
+        kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+        const kelasList = this.value === data.sekolahA ? data.kelasA : data.kelasB;
+        kelasList.forEach(k => {
+          const opt = document.createElement("option");
+          opt.value = k;
+          opt.textContent = k;
+          kelasSelect.appendChild(opt);
+        });
+      });
+    }
+
+    // ===== Absen Siswa =====
+    const absenContainer = document.getElementById("absenContainer");
+    const pilihKelasMessage = document.getElementById("pilihKelasMessage");
+    const siswaTableBody = document.getElementById("siswaTableBody");
+
+    kelasSelect.addEventListener("change", function() {
+      const selectedKelas = this.value;
+      siswaTableBody.innerHTML = '';
+
+      if(selectedKelas){
+        const siswaFiltered = data.siswaList.filter(s => s.kelas.trim() === selectedKelas.trim());
+        if(siswaFiltered.length){
+          pilihKelasMessage.classList.add('hidden');
+          absenContainer.classList.remove('hidden');
+
+          siswaFiltered.forEach((s, index) => {
+            const row = document.createElement("tr");
+            row.className = "hover:bg-gray-50";
+            row.innerHTML = `
+              <td class="px-6 py-4 text-center text-sm font-medium text-gray-900 border-r border-gray-200">${index + 1}</td>
+              <td class="px-6 py-4 text-left text-sm font-medium text-gray-900 border-r border-gray-200">${s.nama}</td>
+              <td class="px-6 py-4 text-center border-r border-gray-200">
+                <select name="status_${index}" onchange="toggleKeterangan(${index})" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-indigo-50 text-sm bg-white shadow-sm transition-all duration-200">
+                  <option value="Hadir">Hadir</option>
+                  <option value="Sakit">Sakit</option>
+                  <option value="Ijin">Ijin</option>
+                  <option value="Alpa">Alpa</option>
+                </select>
+              </td>
+              <td class="px-6 py-4 text-left">
+                <input type="text" name="keterangan_${index}" id="keterangan_${index}" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:bg-indigo-50 text-sm bg-white shadow-sm transition-all duration-200 hidden"
+                  placeholder="Keterangan (opsional)">
+              </td>
+            `;
+            siswaTableBody.appendChild(row);
+          });
+
+        } else {
+          absenContainer.classList.add('hidden');
+          pilihKelasMessage.classList.remove('hidden');
+        }
+      } else {
+        absenContainer.classList.add('hidden');
+        pilihKelasMessage.classList.remove('hidden');
+      }
+    });
+    })
+    .catch(err => console.error(err));
+
+    // ===== Fungsi toggle keterangan =====
+    function toggleKeterangan(index){
+    const statusSelect = document.querySelector(`select[name="status_${index}"]`);
+    const keteranganInput = document.getElementById(`keterangan_${index}`);
+    if(statusSelect.value === 'Sakit' || statusSelect.value === 'Ijin'){
+        keteranganInput.classList.remove('hidden');
+    } else {
+        keteranganInput.classList.add('hidden');
+        keteranganInput.value = '';
+    }
+    }
+</script>
+<script>
+  function toggleSubMenu(id) {
+      const submenu = document.getElementById(id);
+      const arrow = document.getElementById('arrow-' + id);
+
+      submenu.classList.toggle('hidden');
+      arrow.classList.toggle('rotate-180'); // animasi panah berputar
+  }
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992e6d3033ccafeb',t:'MTc2MTE5MzA2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>
+// ===== Fungsi SIMPAN ABSEN =====
+async function simpanAbsen(absenData) {
+  try {
+    const response = await fetch(BASE_URL + "?type=absen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(absenData)
+    });
+
+    const result = await response.json();
+    console.log("Response:", result);
+
+    if (result.result === "success") {
+      document.getElementById("successNotification").classList.remove("hidden");
+      document.getElementById('formAbsen').reset();
+      document.getElementById('siswaTableBody').innerHTML = '';
+      document.getElementById('absenContainer').classList.add('hidden');
+    } else {
+      alert("Gagal menyimpan absen! " + (result.message || ""));
+    }
+
+  } catch (err) {
+    console.error("Error:", err);
+    alert("Terjadi kesalahan saat mengirim data!");
+  }
+}
+
+document.getElementById("formAbsen").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const siswaRows = document.querySelectorAll("#siswaTableBody tr");
+  if (!siswaRows.length) {
+    alert("Tidak ada data siswa.");
+    return;
+  }
+
+  // Ambil nilai utama dari input
+  const guru = document.getElementById("guru")?.value || "";
+  const tanggal = document.getElementById("hariTanggal")?.value || "";
+  const mapel = document.querySelector("#mapelContainer select, #mapelContainer input")?.value || "";
+  const sekolah = document.querySelector("#sekolahContainer select, #sekolahContainer input")?.value || "";
+  const kelas = document.getElementById("kelas")?.value || "";
+  const jam = document.getElementById("jam")?.value || "";
+  const pertemuanKe = document.getElementById("pertemuanKe")?.value || "";
+  const materi = document.getElementById("materi")?.value || "";
+
+  const absenData = Array.from(siswaRows).map(row => {
+    const nama = row.cells[1]?.textContent.trim() || "";
+    const status = row.querySelector("select")?.value || "";
+    const keterangan = row.querySelector("input")?.value.trim() || "";
+
+    return {
+      waktuInput: new Date().toISOString(),
+      guru, tanggal, mapel, sekolah, kelas, jam, pertemuanKe, materi,
+      nama, status, keterangan
+    };
+  });
+
+  console.log("Kirim:", absenData);
+  simpanAbsen(absenData);
+});
+</script>
+
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const overlay = document.getElementById('overlay');
+
+    function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebarFunc() {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+     // tombol hamburger
+    menuToggle.addEventListener('click', openSidebar);
+    // tombol X di sidebar
+    closeSidebar.addEventListener('click', closeSidebarFunc);
+    // klik overlay
+    overlay.addEventListener('click', closeSidebarFunc);
+
+    // klik di luar sidebar
+    document.addEventListener('click', function(e) {
+        const clickInside = sidebar.contains(e.target);
+        const clickToggle = menuToggle.contains(e.target);
+        const isMobile = window.innerWidth < 1024;
+        if (!clickInside && !clickToggle && isMobile && !sidebar.classList.contains('-translate-x-full')) {
+            closeSidebarFunc();
+        }
+    });
+
+    // Saat resize, tampilkan sidebar normal di desktop
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 1024) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        } else {
+            sidebar.classList.add('-translate-x-full');
+        }
+    });
+</script>
+<script>
+    function updateClock() {
+        const now = new Date();
+
+        // Format waktu: HH:MM:SS
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        // Format tanggal: Rabu, 23 Oktober 2025
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateString = now.toLocaleDateString('id-ID', options);
+
+        document.getElementById('date').textContent = dateString + ',';
+        document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+
+        // Update di bagian "Jadwal Hari Ini" (tanpa jam)
+        const tanggalJadwal = document.getElementById('tanggalJadwal');
+        if (tanggalJadwal) {
+            tanggalJadwal.textContent = dateString;
+        }
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
+</body>
+</html>
